@@ -3,6 +3,8 @@ require"parse/grammar"
 require"parse/oracle_parser_helper"
 local language = require"parse/language"
 
+parse_object, parse_object_ref = create_parser_forwarded_to_ref()
+
 parse_color_abbr = choose_string(language.color_abbreviations)
 parse_color_word = choose_string(language.color_words)
 parse_creature_type = choose_string_or_plural(language.creature_types)
@@ -16,15 +18,16 @@ parse_mana = choice {
     parse_color_abbr ~ mana_symbol.MS_Mana
 }
 
-parse_mana_symbol = between_brackets(parse_mana)
+parse_mana_symbol = between_braces(parse_mana)
 
-parse_tap_symbol = between_brackets(parse_word("T"))
+parse_tap_symbol = between_braces(parse_word("T"))
 
-parse_cost = choice {
+parse_cost = sep(choice {
     many1(parse_mana_symbol) ~ cost.Pay_Mana,
     parse_word("pay") >> parse_any_number << parse_word("life") ~ cost.Pay_Life,
-    parse_tap_symbol ~ cost.Pay_Tap()
-}
+    parse_tap_symbol ~ cost.Pay_Tap(),
+    parse_word("sacrifice") >> parse_object ~ cost.Pay_Sacrifice
+}, parse_symbol(","))
 
 parse_type = choice {
     parse_word_or_plural("creature") ~ card_type.T_Creature,
@@ -56,7 +59,7 @@ parse_keyword_ability = choice {
     (parse_word("ward") & parse_symbol("—")) >> parse_cost ~ keyword_ability.KW_Ward
 }
 
-parse_base_object = choice {
+parse_base_object = optional(parse_word("a")) >> choice {
     parse_word("this") >> parse_type - object.O_WithQual(object.O_Base(), qualification.Is_This()),
     parse_word("it") - object.O_It(),
     parse_type ~ function(typ) return object.O_WithQual(object.O_Base(), qualification.Is_IsType(typ)) end,
@@ -84,11 +87,11 @@ parse_qualification_suffix = choice {
     parse_word("token") >> ret_object_with_qual(qualification.Is_Token())
 }
 
-parse_object = normalize_object(suffix1(prefix1(parse_base_object, parse_qualification_prefix), parse_qualification_suffix))
+parse_single_object = normalize_object(suffix1(prefix1(parse_base_object, parse_qualification_prefix), parse_qualification_suffix))
 
-parse_object = choice {
-    parse_comma_list(parse_object),
-    parse_object,
+parse_object_ref.value = choice {
+    parse_comma_list(parse_single_object),
+    parse_single_object,
 }
 
 parse_target = parse_word("target") >> parse_object ~ target.Target
@@ -110,11 +113,12 @@ parse_effect = choice {
     parse_words{"you", "gain"} >> parse_any_number << parse_word("life") ~ function(amt) return effect.E_GainLife(player.P_You(), amt) end,
     (parse_words{"put", "a"} >> parse_counter) & (parse_word("on") >> parse_object_or_target) ~ map2(effect.E_PutCounter),
     parse_word("destroy") >> parse_object_or_target ~ effect.E_Destroy,
+    parse_word("exile") >> parse_object_or_target ~ effect.E_Destroy,
 }
 
 parse_triggered_ability = (parse_triggered_ability_condition << parse_symbol(",")) & parse_effect << parse_symbol(".") ~ map2(ability.A_Triggered)
 
-parse_activated_ability = (parse_cost << parse_symbol(":")) & parse_effect
+parse_activated_ability = (parse_cost << parse_symbol(":")) & parse_effect << parse_symbol(".") ~ map2(ability.A_Activated)
 
 parse_static_ability = choice {
     parse_keyword_ability
@@ -126,7 +130,7 @@ parse_ability = choice {
     parse_static_ability
 }
 
-parse_permanent = sep(parse_ability, parse_symbol("NEWLINE") | parse_symbol(","))
-parse_spell = sep(parse_effect, parse_symbol("NEWLINE"))
+parse_permanent = all(sep(parse_ability, parse_symbol("NEWLINE") | parse_symbol(",")))
+parse_spell = all(sep(parse_effect << parse_symbol("."), parse_symbol("NEWLINE")))
 
 parse_card = parse_permanent | parse_spell

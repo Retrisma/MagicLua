@@ -104,6 +104,7 @@ keyword_ability = {
 
 ability = {
     A_Triggered = function(cond, effect) return { "TriggeredAbility", cond, effect} end,
+    A_Activated = function(cost, effect) return { "ActivatedAbility", cost, effect } end,
     A_Static = function(full) return { "StaticAbility", full } end,
     A_Keyword = function(kw) return { "KeywordAbility", kw } end,
 }
@@ -114,12 +115,14 @@ effect = {
     E_PutCounter = function(counter, object) return { "PutCounterOn", counter, object } end,
     E_CreateToken = function(quals) return { "CreateToken", quals } end,
     E_Destroy = function(obj) return { "Destroy", obj } end,
+    E_Exile = function(obj) return { "Exile", obj } end,
 }
 
 cost = {
     Pay_Life = function(amount) return { "PayLife", amount } end,
     Pay_Mana = function(cost) return { "PayMana", cost } end,
-    Pay_Tap = name0("PayTap")
+    Pay_Tap = name0("PayTap"),
+    Pay_Sacrifice = function(obj) return { "PaySacrifice", obj } end,
 }
 
 grammar_levels = {

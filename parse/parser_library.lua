@@ -215,6 +215,25 @@ function optional(parser)
     return new_parser(parser_fn)
 end
 
+---returns success only if the whole stream was used
+---@param parser Parser
+---@return Parser
+function all(parser)
+    local function parser_fn(stream)
+        local result = parser % stream
+
+        if result.status == "success" then
+            if #result.tail == 0 then
+                return result
+            end
+        end
+
+        return failure("all: did not use all tokens")
+    end
+
+    return new_parser(parser_fn)
+end
+
 function sep_by_1(parser, sep_parser)
     local sep_then_p = sep_parser >> parser
     return (parser & many(sep_then_p)) ~ map2(function(p, plist)

@@ -54,6 +54,8 @@ function test_parser(card)
         data = json.decode(data).text
         file:close()
     end
+
+    parse_with(parse_card, data)
 end
 
 function parse_with(parser, string)
@@ -83,4 +85,4 @@ function test(card, data)
     end
 end
 
-parse_with(parse_mana_symbol, "{1}")
+test_all(test)
