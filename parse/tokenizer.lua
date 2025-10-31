@@ -27,7 +27,7 @@ local symbol_regex = construct_literal(symbols)
 local whitespace_regex = "^([ ]+)"
 local word_regex = "^[%w']+"
 local number_regex = "^%d+"
-local reminder_text_regex = "^%(.*%)"
+local reminder_text_regex = "^%(.-%)"
 
 function match_reserved_symbols(str)
     for i,v in ipairs(symbol_regex) do

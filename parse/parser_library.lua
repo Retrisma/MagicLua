@@ -10,6 +10,7 @@ parser_mt = {
 
     __mod = function (a, b) return run_p(a, b) end,
     __bxor = function (a, b) return map_p(b, a) end,
+    __sub = function(a, b) return discard_p(b, a) end,
 
     __shl = function (a, b) return and_keep_left(a, b) end,
     __shr = function (a, b) return and_keep_right(a, b) end,
@@ -89,12 +90,14 @@ end
 ---@return Parser
 function or_else(parser_if, parser_else)
     local function parser_fn(stream)
+        local pre_stream = table.copy(stream)
+
         local result = parser_if % stream
 
         if result.status == "success" then
             return result
         else
-            return parser_else % stream
+            return parser_else % pre_stream
         end
     end
 
@@ -124,6 +127,23 @@ function map_p(fn, parser)
     return new_parser(parser_fn)
 end
 
+---@param o any
+---@param parser Parser
+---@return Parser
+function discard_p(o, parser)
+    local function parser_fn(stream)
+        local result = parser % stream
+
+        if result.status == "success" then
+            result.head = o
+        end
+
+        return result
+    end
+
+    return new_parser(parser_fn)
+end
+
 ---@param parser_before Parser
 ---@param parser_after Parser
 ---@return Parser
@@ -137,8 +157,7 @@ end
 ---@return Parser
 function and_keep_right(parser_before, parser_after)
     local result = parser_before & parser_after
-        return result ~ map2(function(_, b) return b end)
-
+    return result ~ map2(function(_, b) return b end)
 end
 
 ---@param parser Parser
@@ -162,6 +181,20 @@ end
 function many(parser)
     local function parser_fn(stream)
         local head, tail = zero_or_more(parser, stream)
+        return success(head, tail)
+    end
+
+    return new_parser(parser_fn)
+end
+
+---@param parser Parser
+---@return Parser
+function many1(parser)
+    local function parser_fn(stream)
+        local head, tail = zero_or_more(parser, stream)
+        if #head == 0 then
+            return failure("not many1")
+        end
         return success(head, tail)
     end
 
