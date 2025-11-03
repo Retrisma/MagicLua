@@ -1,9 +1,15 @@
+---@alias Token TWord | TSym | TNum
 token = {
+    ---@class TWord
+    ---@field word string
     TWord = function(word) return { "TWord", word } end,
 
-    --includes newlines, {, •, etc
+    ---@class TSym
+    ---@field sym string
     TSym = function(sym) return { "TSym", sym } end,
 
+    ---@class TNum
+    ---@field num number
     TNum = function(num) return { "TNum", num } end
 }
 

@@ -87,6 +87,8 @@ qualification = {
     Is_IsColor = function(color) return { "IsColor", color } end,
     Is_HasKeyword = function(kw) return { "HasKeyword", kw } end,
     Is_PowerToughness = function(pt) return { "HasPowerToughness", pt } end,
+    Is_PowerAtLeast = function(power) return { "HasPowerAtLeast", power } end,
+    Is_ToughnessAtLeast = function(toughness) return { "HasToughnessAtLeast", toughness } end,
 }
 
 keyword_ability = {

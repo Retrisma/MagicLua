@@ -66,6 +66,33 @@ function parse_word(word)
     return parse_specific("TWord", word)
 end
 
+function optional(parser)
+    local function parser_fn(stream)
+        local result = parser % stream
+
+        if result.status == "success" then
+            return success(option.Some(result.head), result.tail)
+        else
+            return success(option.None(), stream)
+        end
+    end
+
+    return new_parser(parser_fn)
+end
+
+function sep_and_end(parser, sep_parser)
+    return sep(parser, sep_parser) << optional(sep_parser)
+end
+
+function between(symbol1, parser, symbol2)
+    return parse_symbol(symbol1) >> parser << parse_symbol(symbol2)
+end
+
+function between_parens(parser) return between("(", parser, ")") end
+function between_brackets(parser) return between("[", parser, "]") end
+function between_braces(parser) return between("{", parser, "}") end
+function between_colons(parser) return between("::", parser, "::") end
+
 function parse_plural(word)
     local function parser_fn(stream)
         local result = parse_word(word .. "s") % stream
@@ -97,16 +124,16 @@ end
 ---@param words table<string>
 ---@return Parser
 function choose_string(words)
-    local parsers = table.map(words, function(x) return parse_word(x) end)
-    return choice(parsers)
+    return parse_any_word // function(word)
+        if table.has(words, word) then
+            return return_p(word)
+        else
+            return fail_p("choose_string: did not have specified string")
+        end
+    end
 end
 
----@param words table<string>
----@return Parser
-function choose_string_or_plural(words)
-    local parsers = table.map(words, function(x) return parse_word_or_plural(x) end)
-    return choice(parsers)
-end
+--TODO: reimplement choose_string_or_plural
 
 ---@type Parser
 parse_plus_or_minus = parse_symbol("+") | parse_symbol("-")

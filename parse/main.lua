@@ -68,6 +68,7 @@ function parse_with(parser, string)
         print()
     else
         print("fail")
+        print(o.reason)
     end
 end
 
@@ -85,4 +86,7 @@ function test(card, data)
     end
 end
 
-test_all(test)
+--test_all(test)
+test_parser("Resolute Reinforcements")
+
+parse_with(parse_effect, "create a 1/1 white Soldier creature token")
