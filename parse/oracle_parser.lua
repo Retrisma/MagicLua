@@ -5,6 +5,7 @@ local language = require"parse/language"
 
 parse_object, parse_object_ref = create_parser_forwarded_to_ref()
 
+
 parse_color_abbr = choose_string(language.color_abbreviations)
 parse_color_word = choose_string(language.color_words)
 parse_creature_type = choose_string(language.creature_subtypes)
@@ -59,42 +60,7 @@ parse_keyword_ability = choice {
     (parse_word("ward") & parse_symbol("—")) >> parse_cost ~ keyword_ability.KW_Ward
 }
 
-parse_base_object = optional(parse_word("a")) >> choice {
-    parse_word("this") >> parse_type - object.O_WithQual(object.O_Base(), qualification.Is_This()),
-    parse_word("it") - object.O_It(),
-    parse_type ~ function(typ) return object.O_WithQual(object.O_Base(), qualification.Is_IsType(typ)) end,
-    parse_creature_type ~ function(typ) return object.O_WithQual(object.O_Base(), qualification.Is_IsType(typ)) end,
-}
-
-function ret_object_with_qual(qual)
-    return return_p(function(obj)
-        return object.O_WithQual(obj, qual)
-    end)
-end
-
-parse_qualification_prefix = choice {
-    parse_word("another") >> ret_object_with_qual(qualification.Is_NotThis()),
-    parse_word("nontoken") >> ret_object_with_qual(qualification.Is_NotToken()),
-    parse_color_word // function(color) return ret_object_with_qual(qualification.Is_IsColor(color)) end,
-    parse_pt_definition // function(pt) return ret_object_with_qual(qualification.Is_PowerToughness(pt)) end,
-}
-
-parse_qualification_suffix = choice {
-    parse_words{ "you", "control" } >> ret_object_with_qual(qualification.Is_ControlledBy(player.P_You())),
-    parse_words{ "an", "opponent", "controls" } >> ret_object_with_qual(qualification.Is_ControlledBy(player.P_Opponent())),
-    (parse_word("with") >> parse_keyword_ability) // function(kw) return ret_object_with_qual(qualification.Is_HasKeyword(kw)) end,
-    (parse_words{ "with", "power" } >> parse_any_number << parse_words{ "or", "greater" }) // function(power) return ret_object_with_qual(qualification.Is_PowerAtLeast(power)) end,
-    (parse_words{ "with", "toughness" } >> parse_any_number << parse_words{ "or", "greater" }) // function(power) return ret_object_with_qual(qualification.Is_ToughnessAtLeast(power)) end,
-    parse_type // function(typ) return ret_object_with_qual(qualification.Is_IsType(typ)) end,
-    parse_word("token") >> ret_object_with_qual(qualification.Is_Token())
-}
-
-parse_single_object = normalize_object(suffix1(prefix1(parse_base_object, parse_qualification_prefix), parse_qualification_suffix))
-
-parse_object_ref.value = choice {
-    parse_comma_list(parse_single_object),
-    parse_single_object,
-}
+require"parse/oracle_parser/object"
 
 parse_target = parse_word("target") >> parse_object ~ target.Target
 

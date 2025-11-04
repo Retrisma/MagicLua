@@ -83,12 +83,15 @@ qualification = {
     Is_NotThis = function() return { "NotThis" } end,
     Is_Token = function() return { "IsToken" } end,
     Is_NotToken = function() return { "IsNontoken" } end,
+    Is_Spell = function() return { "IsSpell" } end,
     Is_IsType = function(type) return { "IsType", type } end,
     Is_IsColor = function(color) return { "IsColor", color } end,
     Is_HasKeyword = function(kw) return { "HasKeyword", kw } end,
     Is_PowerToughness = function(pt) return { "HasPowerToughness", pt } end,
     Is_PowerAtLeast = function(power) return { "HasPowerAtLeast", power } end,
     Is_ToughnessAtLeast = function(toughness) return { "HasToughnessAtLeast", toughness } end,
+    Is_Attacking = function() return { "IsAttacking" } end,
+    Is_Blocking = function() return { "IsBlocking" } end,
 }
 
 keyword_ability = {
