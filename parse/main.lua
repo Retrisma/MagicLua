@@ -87,4 +87,3 @@ function test(card, data)
 end
 
 test_all(test)
-test_parser("Resolute Reinforcements")

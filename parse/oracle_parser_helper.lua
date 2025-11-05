@@ -138,6 +138,14 @@ end
 ---@type Parser
 parse_plus_or_minus = parse_symbol("+") | parse_symbol("-")
 
+parse_or_greater = parse_any_number << parse_words{"or", "greater"} ~ comparison.Comp_OrGreater
+parse_or_less = parse_any_number << parse_words{"or", "greater"} ~ comparison.Comp_OrLess
+parse_equal_to = parse_any_number ~ comparison.Comp_EqualTo
+
+parse_comparison = choice {
+    parse_or_greater, parse_or_less, parse_equal_to
+}
+
 ---@param each Parser
 ---@returns Parser
 parse_comma_list = function(each)

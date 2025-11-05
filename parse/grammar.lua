@@ -32,6 +32,12 @@ pt_modifier = {
     end
 }
 
+comparison = {
+    Comp_OrGreater = function(num) return { "OrGreater", num } end,
+    Comp_OrLess = function(num) return { "OrLess", num } end,
+    Comp_EqualTo = function(num) return { "EqualTo", num } end,
+}
+
 counter = {
     Cntr_Named = function(counter) return { "NamedCounter", counter } end,
     Cntr_PT = function(mod) return { "PTCounter", mod } end
@@ -62,10 +68,9 @@ triggered_ability_when_condition = {
 }
 
 object = {
-    O_Base = function() return { "BaseObject" } end,
     O_It = function() return { "It" } end,
-    O_WithQual = function(obj, qual) return { "ObjectThat", obj, qual } end,
-    O_Qualified = function(quals) return { "QualifiedObject", quals } end
+    O_This = function() return { "This" } end,
+    O_Qualified = function(quals) return { "ObjectThat", quals } end
 }
 
 target = {
@@ -79,7 +84,6 @@ player = {
 
 qualification = {
     Is_ControlledBy = function(player) return { "ControlledBy", player } end,
-    Is_This = function() return { "This" } end,
     Is_NotThis = function() return { "NotThis" } end,
     Is_Token = function() return { "IsToken" } end,
     Is_NotToken = function() return { "IsNontoken" } end,
@@ -88,8 +92,8 @@ qualification = {
     Is_IsColor = function(color) return { "IsColor", color } end,
     Is_HasKeyword = function(kw) return { "HasKeyword", kw } end,
     Is_PowerToughness = function(pt) return { "HasPowerToughness", pt } end,
-    Is_PowerAtLeast = function(power) return { "HasPowerAtLeast", power } end,
-    Is_ToughnessAtLeast = function(toughness) return { "HasToughnessAtLeast", toughness } end,
+    Is_Power = function(power) return { "HasPower", power } end,
+    Is_Toughness = function(toughness) return { "HasToughness", toughness } end,
     Is_Attacking = function() return { "IsAttacking" } end,
     Is_Blocking = function() return { "IsBlocking" } end,
 }
@@ -104,6 +108,9 @@ keyword_ability = {
     KW_FirstStrike = name0("First Strike"),
     KW_DoubleStrike = name0("Double Strike"),
     KW_Flash = name0("Flash"),
+    KW_Deathtouch = name0("Deathtouch"),
+    KW_Haste = name0("Haste"),
+    KW_Prowess = name0("Prowess"),
     KW_Ward = function(cost) return { "Ward", cost } end,
 }
 
@@ -121,7 +128,18 @@ effect = {
     E_CreateToken = function(quals) return { "CreateToken", quals } end,
     E_Destroy = function(obj) return { "Destroy", obj } end,
     E_Exile = function(obj) return { "Exile", obj } end,
+    E_Counter = function(obj) return { "Counter", obj } end,
+    E_Scry = function(player, amount) return { "Scry", player, amount } end,
+    E_Surveil = function(player, amount) return { "Surveil", player, amount } end,
+    E_EndTurn = function() return { "EndTheTurn" } end,
 }
+
+--effects to-do list:
+--"OBJECT gets +N/+N until end of turn."
+--"CARDNAME deals 3 damage to any target."
+--"Add {B}{B}{B}."
+--"Create a Food token."
+--"Return OBJECT to its owner's hand."
 
 cost = {
     Pay_Life = function(amount) return { "PayLife", amount } end,
@@ -135,6 +153,7 @@ grammar_levels = {
     logic,
     mana_symbol,
     pt_modifier,
+    comparison,
     counter,
     card_type,
     triggered_ability_condition_lhs,

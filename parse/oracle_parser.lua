@@ -57,10 +57,13 @@ parse_keyword_ability = choice {
     parse_words{"first", "strike"} - keyword_ability.KW_FirstStrike(),
     parse_words{"double", "strike"} - keyword_ability.KW_DoubleStrike(),
     parse_word("flash") - keyword_ability.KW_Flash(),
+    parse_word("deathtouch") - keyword_ability.KW_Deathtouch(),
+    parse_word("prowess") - keyword_ability.KW_Prowess(),
+    parse_word("haste") - keyword_ability.KW_Haste(),
     (parse_word("ward") & parse_symbol("—")) >> parse_cost ~ keyword_ability.KW_Ward
 }
 
-require"parse/oracle_parser/object"
+parse_object_ref.value = require"parse/oracle_parser/object"
 
 parse_target = parse_word("target") >> parse_object ~ target.Target
 
@@ -84,7 +87,11 @@ parse_effect = choice {
     (parse_words{"put", "a"} >> parse_counter) & (parse_word("on") >> parse_object_or_target) ~ map2(effect.E_PutCounter),
     parse_word("destroy") >> parse_object_or_target ~ effect.E_Destroy,
     parse_word("exile") >> parse_object_or_target ~ effect.E_Exile,
-    parse_words{"create", "a"} >> parse_object ~ effect.E_CreateToken
+    parse_words{"create", "a"} >> parse_object ~ effect.E_CreateToken,
+    parse_word("counter") >> parse_object_or_target ~ effect.E_Counter,
+    parse_word("scry") >> parse_any_number ~ function(amt) return effect.E_Scry(player.P_You(), amt) end,
+    parse_word("surveil") >> parse_any_number ~ function(amt) return effect.E_Surveil(player.P_You(), amt) end,
+    parse_words{"end", "the", "turn"} - effect.E_EndTurn()
 }
 
 parse_triggered_ability = (parse_triggered_ability_condition << parse_symbol(",")) & parse_effect << parse_symbol(".") ~ map2(ability.A_Triggered)
