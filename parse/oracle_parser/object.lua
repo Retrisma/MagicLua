@@ -5,13 +5,15 @@ function ret_qual(qual)
     end)
 end
 
--- BASE OBJECTS
-
----"this"
-local parse_this = parse_word("this") >> parse_type - object.O_This()
-
----"it"
-local parse_it = parse_word("it") - object.O_It()
+--[[
+base_object := 
+    list of
+    | [card_type]
+    | [card_subtype]
+    | token
+    | spell
+    | permanent
+]]
 
 ---"[card type]"
 local parse_type_object = parse_type ~ qualification.Is_IsType
@@ -20,14 +22,22 @@ local parse_type_object = parse_type ~ qualification.Is_IsType
 local parse_subtype_object = parse_subtype ~ qualification.Is_IsType
 
 local parse_base_object = many1(choice {
-    -- parse_it, TODO: handle separately
     parse_word("token") - qualification.Is_Token(),
     parse_word("spell") - qualification.Is_Spell(),
+    parse_word("permanent") - qualification.Is_Permanent(),
     parse_type_object,
     parse_subtype_object
 })
 
--- PREFIXES
+--[[
+object_prefix :=
+    | another [object]
+    | nontoken [object]
+    | [color] [object]
+    | [pt_definition] [object]
+    | attacking [object]
+    | blocking [object]
+]]
 
 ---"another OBJECT"
 local prefix_another = parse_word("another") >> ret_qual(qualification.Is_NotThis())
@@ -58,7 +68,14 @@ local parse_qualification_prefix = choice {
     prefix_blocking,
 }
 
--- SUFFIXES
+--[[
+object_suffix :=
+    | [object] you control
+    | [object] an opponent controls
+    | [object] with [keyword]
+    | [object] with power [comparison]
+    | [object] with toughness [comparison]
+]]
 
 ---"OBJECT you control"
 local suffix_you_control = parse_words{ "you", "control" } >> ret_qual(qualification.Is_ControlledBy(player.P_You()))
@@ -70,11 +87,11 @@ local suffix_opponent_controls = parse_words{ "an", "opponent", "controls" } >> 
 local suffix_with_keyword = (parse_word("with") >> parse_keyword_ability) //
     function(kw) return ret_qual(qualification.Is_HasKeyword(kw)) end
 
----"OBJECT with power N or greater"
+---"OBJECT with power N [comparison]"
 local suffix_with_power_ge = (parse_words{ "with", "power" } >> parse_comparison) //
     function(power) return ret_qual(qualification.Is_Power(power)) end
 
----"OBJECT with toughness N or greater"
+---"OBJECT with toughness [comparison]"
 local suffix_with_toughness_ge = (parse_words{ "with", "toughness" } >> parse_comparison) //
     function(tough) return ret_qual(qualification.Is_Toughness(tough)) end
 
@@ -86,7 +103,25 @@ local parse_qualification_suffix = choice {
     suffix_with_toughness_ge,
 }
 
+--[[
+single_object := [prefix..] [object] [suffix..]
+]]
+
 local parse_single_object = suffix1(prefix1(parse_base_object, parse_qualification_prefix), parse_qualification_suffix) ~ object.O_Qualified
+
+--[[
+object :=
+    | this
+    | it
+    | single_object
+    | comma_list of single_object
+]]
+
+---"this"
+local parse_this = parse_word("this") >> parse_type - object.O_This()
+
+---"it"
+local parse_it = parse_word("it") - object.O_It()
 
 return choice {
     parse_this,

@@ -5,7 +5,6 @@ local language = require"parse/language"
 
 parse_object, parse_object_ref = create_parser_forwarded_to_ref()
 
-
 parse_color_abbr = choose_string(language.color_abbreviations)
 parse_color_word = choose_string(language.color_words)
 parse_creature_type = choose_string(language.creature_subtypes)
@@ -38,6 +37,10 @@ parse_type = choice {
     parse_word_or_plural("instant") ~ card_type.T_Instant,
     parse_word_or_plural("sorcery") ~ card_type.T_Sorcery,
 }
+
+-- parse_phase = choice {
+--     parse_word
+-- }
 
 parse_pt_modifier = ((parse_plus_or_minus & parse_any_number) << parse_symbol("/")) & parse_plus_or_minus & parse_any_number ~ map4(pt_modifier.PT_Mod)
 parse_pt_definition = (parse_any_number << parse_symbol("/")) & parse_any_number ~ map2(pt_modifier.PT_Def)

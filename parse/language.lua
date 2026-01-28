@@ -7,6 +7,10 @@ return {
         "w", "u", "b", "r", "g"
     },
 
+    color_descriptions = {
+        "colorless", "multicolored"
+    },
+
     creature_subtypes = {
         "advisor", "aetherborn", "alien", "ally", "angel", "antelope", "ape", "archer", "archon", "armadillo",
         "army", "artificer", "assassin", "assembly-worker", "astartes", "atog", "aurochs", "avatar", "azra", "badger",
@@ -41,5 +45,5 @@ return {
 
     named_tokens = {
         "food"
-    }
+    },
 }

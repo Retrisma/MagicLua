@@ -43,6 +43,27 @@ counter = {
     Cntr_PT = function(mod) return { "PTCounter", mod } end
 }
 
+step = {
+    Step_Untap = function(player) return { "UntapStep", player } end,
+    Step_Upkeep = function(player) return { "UpkeepStep", player } end,
+    Step_Draw = function(player) return { "DrawStep", player } end,
+    Step_StartCombat = function(player) return { "StartCombatStep", player } end,
+    Step_Attackers = function(player) return { "AttackersStep", player } end,
+    Step_Blockers = function(player) return { "BlockersStep", player } end,
+    Step_Damage = function(player) return { "DamageStep", player } end,
+    Step_EndCombat = function(player) return { "EndCombatStep", player } end,
+    Step_End = function(player) return { "EndStep", player } end,
+    Step_Cleanup = function(player) return { "CleanupStep", player } end,
+}
+
+phase = {
+    Phase_Beginning = function(player) return { "BeginningPhase", player } end,
+    Phase_Main = function(player) return { "MainPhase", player } end,
+    Phase_FirstMain = function(player) return { "FirstMainPhase", player } end,
+    Phase_PostcombatMain = function(player) return { "PostcombatMainPhase", player } end,
+    Phase_End = function(player) return { "EndPhase" } end,
+}
+
 card_type = {
     T_Creature = function() return { "Creature" } end,
     T_Land = function() return { "Land" } end,
@@ -67,6 +88,10 @@ triggered_ability_when_condition = {
     When_Attacks = function(object) return { "WhenAttacks", object } end,
 }
 
+triggered_ability_at_condition = {
+    
+}
+
 object = {
     O_It = function() return { "It" } end,
     O_This = function() return { "This" } end,
@@ -79,7 +104,8 @@ target = {
 
 player = {
     P_You = function() return { "You" } end,
-    P_Opponent = function() return { "Opponent" } end
+    P_Opponent = function() return { "Opponent" } end,
+    P_EachPlayer = function() return { "EachPlayer" } end,
 }
 
 qualification = {
@@ -88,6 +114,7 @@ qualification = {
     Is_Token = function() return { "IsToken" } end,
     Is_NotToken = function() return { "IsNontoken" } end,
     Is_Spell = function() return { "IsSpell" } end,
+    Is_Permanent = function() return { "IsPermanent" } end,
     Is_IsType = function(type) return { "IsType", type } end,
     Is_IsColor = function(color) return { "IsColor", color } end,
     Is_HasKeyword = function(kw) return { "HasKeyword", kw } end,
@@ -155,6 +182,8 @@ grammar_levels = {
     pt_modifier,
     comparison,
     counter,
+    step,
+    phase,
     card_type,
     triggered_ability_condition_lhs,
     triggered_ability_when_condition,
